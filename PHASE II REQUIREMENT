@@ -1,0 +1,113 @@
+-- Create TicketTypes Table
+CREATE TABLE TicketTypes (
+    TicketTypeID INT PRIMARY KEY IDENTITY(1,1),
+    TicketTypeName NVARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Modify Roles Table to include new roles
+INSERT INTO Roles (RoleName) VALUES ('PM'), ('Administrator');
+
+-- Rename Bugs table to Tickets and add new fields
+ALTER TABLE Bugs
+RENAME TO Tickets;
+
+-- Add Severity and Priority columns to Tickets table
+ALTER TABLE Tickets
+ADD Severity NVARCHAR(50),
+    Priority NVARCHAR(50),
+    TicketTypeID INT NOT NULL DEFAULT 1, -- Assuming 1 corresponds to 'Bug'
+    FOREIGN KEY (TicketTypeID) REFERENCES TicketTypes(TicketTypeID);
+
+-- Insert initial TicketTypes
+INSERT INTO TicketTypes (TicketTypeName) VALUES ('Bug'), ('Feature Request'), ('Test Case');
+-- PM Creates a Feature Request
+CREATE PROCEDURE CreateFeatureRequest
+    @Summary NVARCHAR(255),
+    @Description NVARCHAR(MAX),
+    @CreatedBy INT,
+    @Severity NVARCHAR(50),
+    @Priority NVARCHAR(50)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Users WHERE UserID = @CreatedBy AND RoleID = (SELECT RoleID FROM Roles WHERE RoleName = 'PM'))
+    BEGIN
+        INSERT INTO Tickets (Summary, Description, CreatedBy, Severity, Priority, TicketTypeID)
+        VALUES (@Summary, @Description, @CreatedBy, @Severity, @Priority, (SELECT TicketTypeID FROM TicketTypes WHERE TicketTypeName = 'Feature Request'));
+    END
+    ELSE
+    BEGIN
+        RAISERROR ('Only PM users can create feature requests.', 16, 1);
+    END
+END;
+-- QA Creates a Test Case
+CREATE PROCEDURE CreateTestCase
+    @Summary NVARCHAR(255),
+    @Description NVARCHAR(MAX),
+    @CreatedBy INT,
+    @Severity NVARCHAR(50),
+    @Priority NVARCHAR(50)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Users WHERE UserID = @CreatedBy AND RoleID = (SELECT RoleID FROM Roles WHERE RoleName = 'QA'))
+    BEGIN
+        INSERT INTO Tickets (Summary, Description, CreatedBy, Severity, Priority, TicketTypeID)
+        VALUES (@Summary, @Description, @CreatedBy, @Severity, @Priority, (SELECT TicketTypeID FROM TicketTypes WHERE TicketTypeName = 'Test Case'));
+    END
+    ELSE
+    BEGIN
+        RAISERROR ('Only QA users can create test cases.', 16, 1);
+    END
+END;
+-- QA Resolves a Test Case
+CREATE PROCEDURE ResolveTestCase
+    @TicketID INT,
+    @ResolvedBy INT
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Users WHERE UserID = @ResolvedBy AND RoleID = (SELECT RoleID FROM Roles WHERE RoleName = 'QA'))
+    BEGIN
+        UPDATE Tickets
+        SET Status = 'Resolved', ResolvedBy = @ResolvedBy, ResolvedAt = GETDATE()
+        WHERE TicketID = @TicketID AND Status = 'Open' AND TicketTypeID = (SELECT TicketTypeID FROM TicketTypes WHERE TicketTypeName = 'Test Case');
+    END
+    ELSE
+    BEGIN
+        RAISERROR ('Only QA users can resolve test cases.', 16, 1);
+    END
+END;
+-- Administrator Adds a New User
+CREATE PROCEDURE AddUser
+    @Username NVARCHAR(50),
+    @Password NVARCHAR(50),
+    @RoleName NVARCHAR(50)
+AS
+BEGIN
+    IF EXISTS (SELECT 1 FROM Users WHERE RoleID = (SELECT RoleID FROM Roles WHERE RoleName = 'Administrator'))
+    BEGIN
+        DECLARE @RoleID INT;
+        SET @RoleID = (SELECT RoleID FROM Roles WHERE RoleName = @RoleName);
+        IF @RoleID IS NOT NULL
+        BEGIN
+            INSERT INTO Users (Username, Password, RoleID)
+            VALUES (@Username, @Password, @RoleID);
+        END
+        ELSE
+        BEGIN
+            RAISERROR ('Invalid role name.', 16, 1);
+        END
+    END
+    ELSE
+    BEGIN
+        RAISERROR ('Only Administrator users can add new users.', 16, 1);
+    END
+END;
+-- Insert new roles
+INSERT INTO Roles (RoleName) VALUES ('PM'), ('Administrator');
+
+-- Insert initial Ticket Types
+INSERT INTO TicketTypes (TicketTypeName) VALUES ('Bug'), ('Feature Request'), ('Test Case');
+
+-- Insert new users (example)
+INSERT INTO Users (Username, Password, RoleID) VALUES 
+('pm_user1', 'password1', (SELECT RoleID FROM Roles WHERE RoleName = 'PM')),
+('admin_user1', 'password1', (SELECT RoleID FROM Roles WHERE RoleName = 'Administrator'));
