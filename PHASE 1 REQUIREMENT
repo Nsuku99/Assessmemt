@@ -1,0 +1,66 @@
+-- Create Roles Table
+CREATE TABLE Roles (
+    RoleID INT PRIMARY KEY IDENTITY(1,1),
+    RoleName NVARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Create Users Table
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Password NVARCHAR(50) NOT NULL,
+    RoleID INT NOT NULL,
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
+);
+
+-- Create Bugs Table
+CREATE TABLE Bugs (
+    BugID INT PRIMARY KEY IDENTITY(1,1),
+    Summary NVARCHAR(255) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+    CreatedBy INT NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    ResolvedBy INT NULL,
+    ResolvedAt DATETIME NULL,
+    Status NVARCHAR(50) DEFAULT 'Open',
+    FOREIGN KEY (CreatedBy) REFERENCES Users(UserID),
+    FOREIGN KEY (ResolvedBy) REFERENCES Users(UserID)
+);
+-- Insert Roles
+INSERT INTO Roles (RoleName) VALUES ('QA'), ('RD');
+
+-- Insert Users
+INSERT INTO Users (Username, Password, RoleID) VALUES 
+('qa_user1', 'password1', (SELECT RoleID FROM Roles WHERE RoleName = 'QA')),
+('rd_user1', 'password1', (SELECT RoleID FROM Roles WHERE RoleName = 'RD'));
+-- QA Creates a Bug
+INSERT INTO Bugs (Summary, Description, CreatedBy) 
+VALUES ('Bug Summary 1', 'Bug Description 1', 1); -- Assuming QA's UserID is 1
+
+-- QA Edits a Bug
+UPDATE Bugs
+SET Summary = 'Updated Summary', Description = 'Updated Description'
+WHERE BugID = 1 AND CreatedBy = 1; -- QA can only edit their own bugs
+-- QA Creates a Bug
+INSERT INTO Bugs (Summary, Description, CreatedBy) 
+VALUES ('Bug Summary 1', 'Bug Description 1', 1); -- Assuming QA's UserID is 1
+
+-- QA Edits a Bug
+UPDATE Bugs
+SET Summary = 'Updated Summary', Description = 'Updated Description'
+WHERE BugID = 1 AND CreatedBy = 1; -- QA can only edit their own bugs
+
+-- QA Deletes a Bug
+DELETE FROM Bugs
+WHERE BugID = 1 AND CreatedBy = 1; -- QA can only delete their own bugs
+
+
+-- QA Deletes a Bug
+DELETE FROM Bugs
+WHERE BugID = 1 AND CreatedBy = 1; -- QA can only delete their own bugs
+-- RD Resolves a Bug
+UPDATE Bugs
+SET Status = 'Resolved', ResolvedBy = 2, ResolvedAt = GETDATE() -- Assuming RD's UserID is 2
+WHERE BugID = 1 AND Status = 'Open';
+
+
