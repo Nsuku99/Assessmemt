@@ -1,0 +1,89 @@
+Actors
+QA (Quality Assurance)
+RD (Research and Development)
+PM (Product Manager)
+Administrator
+Use Cases
+Create Bug (QA)
+
+Description: QA creates a new bug with a summary, description, severity, and priority.
+Primary Actor: QA
+Preconditions: QA must be logged in.
+Postconditions: A new bug is added to the system with status 'Open'.
+Edit Bug (QA)
+
+Description: QA edits the summary, description, severity, and priority of an existing bug.
+Primary Actor: QA
+Preconditions: QA must be logged in and must be the creator of the bug.
+Postconditions: The bug's details are updated.
+Delete Bug (QA)
+
+Description: QA deletes an existing bug.
+Primary Actor: QA
+Preconditions: QA must be logged in and must be the creator of the bug.
+Postconditions: The bug is removed from the system.
+Resolve Bug (RD)
+
+Description: RD marks an existing bug as resolved.
+Primary Actor: RD
+Preconditions: RD must be logged in.
+Postconditions: The bug's status is updated to 'Resolved' and a resolution timestamp is recorded.
+Create Feature Request (PM)
+
+Description: PM creates a new feature request with a summary, description, severity, and priority.
+Primary Actor: PM
+Preconditions: PM must be logged in.
+Postconditions: A new feature request is added to the system with status 'Open'.
+Resolve Feature Request (RD)
+
+Description: RD marks an existing feature request as resolved.
+Primary Actor: RD
+Preconditions: RD must be logged in.
+Postconditions: The feature request's status is updated to 'Resolved' and a resolution timestamp is recorded.
+Create Test Case (QA)
+
+Description: QA creates a new test case with a summary, description, severity, and priority.
+Primary Actor: QA
+Preconditions: QA must be logged in.
+Postconditions: A new test case is added to the system with status 'Open'.
+Resolve Test Case (QA)
+
+Description: QA marks an existing test case as resolved.
+Primary Actor: QA
+Preconditions: QA must be logged in.
+Postconditions: The test case's status is updated to 'Resolved' and a resolution timestamp is recorded.
+Add User (Administrator)
+
+Description: Administrator adds a new user (QA, RD, or PM) to the system.
+Primary Actor: Administrator
+Preconditions: Administrator must be logged in.
+Postconditions: A new user is added to the system with the specified role.
+Manage Users (Administrator)
+
+Description: Administrator can manage (edit or delete) existing users.
+Primary Actor: Administrator
+Preconditions: Administrator must be logged in.
+Postconditions: The user details are updated or the user is removed from the system.
+Use Case Diagram in Text
+QA Actions:
+
+QA logs in
+QA creates a bug
+QA edits a bug
+QA deletes a bug
+QA creates a test case
+QA resolves a test case
+RD Actions:
+
+RD logs in
+RD resolves a bug
+RD resolves a feature request
+PM Actions:
+
+PM logs in
+PM creates a feature request
+Administrator Actions:
+
+Administrator logs in
+Administrator adds a new user
+Administrator manages users (edit/delete)
